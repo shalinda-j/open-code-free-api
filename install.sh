@@ -3,6 +3,7 @@ set -euo pipefail
 
 PROVIDER_NAME="free-model"
 BASE_URL="${FREE_MODEL_BASE_URL:-http://localhost:8080/v1}"
+BASE_URL="${BASE_URL%/}"
 API_KEY="${FREE_MODEL_API_KEY:-free}"
 TARGET="${1:-opencode.json}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -11,13 +12,16 @@ echo "==> Free Model provider for OpenCode"
 echo "    Endpoint: $BASE_URL"
 echo "    Target:   $TARGET"
 
-if MODELS_JSON="$(curl -sf --max-time 10 "$BASE_URL/models" || true)"; then
+SERVER_MODELS=""
+if MODELS_JSON="$(curl -sf --max-time 10 "$BASE_URL/models")"; then
   SERVER_MODELS="$(printf '%s' "$MODELS_JSON" | node -e '
     let s = ""; process.stdin.on("data", d => s += d).on("end", () => {
       try { (JSON.parse(s).data || []).forEach(m => console.log(m.id)); } catch {}
     });' | tr "\n" " ")"
-  if [ -n "$SERVER_MODELS" ]; then
+  if [ -n "${SERVER_MODELS// /}" ]; then
     echo "    Found $(printf '%s' "$SERVER_MODELS" | tr " " "\n" | grep -c .) model(s) on server"
+  else
+    echo "    Warning: server returned no models, using bundled model list"
   fi
 else
   echo "    Warning: server not reachable, using bundled model list"
