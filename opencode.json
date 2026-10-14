@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "free-model": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Free Model",
+      "options": {
+        "apiKey": "free",
+        "baseURL": "http://localhost:8080/v1"
+      },
+      "models": {
+        "free-model-latest": {
+          "name": "Free Model (latest)",
+          "reasoning": false
+        }
+      }
+    }
+  }
+}
